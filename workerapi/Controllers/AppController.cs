@@ -1,15 +1,16 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Infrastructure;
-using System.Globalization;
 using Worker.Data.Entities;
 using Worker.Web.Data;
-using Worker.Web.Models;
+using workerapi.Models;
 
-namespace Worker.Web.Controllers
+namespace workerapi.Controllers
 {
-    public class AppController : Controller
+    [Route("api/[controller]")]
+    [ApiController]
+    public class AppController : ControllerBase
     {
         private readonly WorkerDataContext _context;
 
@@ -17,14 +18,15 @@ namespace Worker.Web.Controllers
         {
             this._context = context;
         }
-        public IActionResult Index()
-        {
-           
-           var models = new List<CustomerModelView>();
 
-            var query = _context.tblCustomer           
-                                     .ToList();           
-                        
+        [HttpGet]
+        public IEnumerable<CustomerModelView> Get()
+        {
+            var models = new List<CustomerModelView>();
+
+            var query = _context.tblCustomer
+                                     .ToList();
+
             foreach (var item in query)
             {
                 var model = new CustomerModelView();
@@ -34,7 +36,7 @@ namespace Worker.Web.Controllers
                                                     item.FirstName);
                 model.Address = string.Format("{0} {1} {2}",
                                             item.Address,
-                                            item.City, 
+                                            item.City,
                                             item.State);
                 var cutloan = _context.tblloan.
                                                FromSqlRaw<Loan>(@"SELECT *                                                                                                                          
@@ -53,7 +55,7 @@ namespace Worker.Web.Controllers
 
 
             }
-            return View(models);
+            return models;
         }
     }
 }
